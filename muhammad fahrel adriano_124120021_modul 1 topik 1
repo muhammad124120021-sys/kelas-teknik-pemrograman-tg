@@ -1,0 +1,21 @@
+# Program Biodata Sederhana
+# Program ini dibuat untuk menampilkan biodata singkat.
+# Dibuat oleh: Muhammad Fahrel Adriano
+# Tanggal: 18 September 2025
+"""
+Blok komentar multi-baris.
+Ini adalah contoh program Python pertama untuk praktikum.
+Program ini hanya akan menampilkan teks ke konsol/terminal.
+"""
+
+# Menampilkan judul biodata
+print("--- BIODATA SAYA ---")
+print("") # Memberikan baris kosong sebagai spasi
+# Menampilkan data diri
+print("Nama : Muhammad Fahrel Adriano")
+print("NIM : 124120021")
+print("Jurusan : Teknik Geofisika")
+print("Angkatan: 2024")
+# Menampilkan hobi
+print("Hobi : Badminton")
+print("\n--- Terima Kasih ---")
