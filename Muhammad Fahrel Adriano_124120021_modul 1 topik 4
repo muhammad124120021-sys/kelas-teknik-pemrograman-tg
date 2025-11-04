@@ -1,0 +1,38 @@
+# Program untuk membuat dan memperbarui daftar belanja
+
+# Inisialisasi list kosong untuk menyimpan barang
+list_belanja = []
+
+# Menambahkan tiga barang ke dalam daftar
+item1 = "raket yonex astrox"
+list_belanja.append(item1)
+
+item2 = "tas eiger"
+list_belanja.append(item2)
+
+item3 = "sepatu puma"
+list_belanja.append(item3)
+
+# Menampilkan daftar belanja awal
+print("Barang yang akan dibeli:", list_belanja)
+
+# Menambahkan barang baru ke daftar belanja
+list_belanja.append("raket yonex astrox")
+list_belanja.append("tas eiger") # Add 'sunscreen' to the list
+print(f"Daftar belanja terbaru: {list_belanja}")
+
+# Menghapus barang yang sudah tidak tersedia
+list_belanja.remove("tas eiger")
+print(f"Setelah tas eiger dihapus: {list_belanja}")
+
+# Program untuk menyimpan informasi kontak seorang teman
+
+# Membuat dictionary berisi data kontak
+data_kontak = {
+    "nama": "Fahrel",
+    "telepon": "082287417249",
+    "email": "muhammad.124120021@student.itera.ac.id"
+}
+
+# Menampilkan nomor telepon berdasarkan kunci 'telepon'
+print("Nomor telepon teman saya adalah:", data_kontak["telepon"])
