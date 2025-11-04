@@ -1,0 +1,21 @@
+# Program untuk Menghitung Luas dan Keliling Persegi Panjang
+print("=== Program Hitung Luas & Keliling Persegi Panjang ===")
+
+# Input nilai panjang dan lebar dari pengguna
+# Fungsi float() digunakan agar input bisa berupa angka desimal
+p = float(input("Inputkan nilai panjang (cm): "))
+l = float(input("Inputkan nilai lebar (cm): "))
+
+# Menghitung hasil luas dan keliling
+# Hasil disimpan dalam variabel luas_persegi dan keliling_persegi
+luas_persegi = p * l
+keliling_persegi = 2 * (p + l)
+
+# Menampilkan hasil perhitungan
+print("\n=== Hasil Perhitungan ===")
+# f-string digunakan untuk menampilkan teks dan variabel dalam satu baris
+print(f"Panjang = {p} cm")
+print(f"Lebar   = {l} cm")
+print("--------------------------")
+print(f"Luas Persegi Panjang     = {luas_persegi} cm²")
+print(f"Keliling Persegi Panjang = {keliling_persegi} cm")
