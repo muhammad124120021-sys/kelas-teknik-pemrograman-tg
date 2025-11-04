@@ -1,21 +1,21 @@
-# Deklarasi variabel untuk harga dan jumlah pembelian buku
-harga_A = 50000   # tipe data integer
-harga_B = 75000   # tipe data integer
-qty_A = int(input("Masukkan jumlah Buku A yang dibeli: "))
-qty_B = int(input("Masukkan jumlah Buku B yang dibeli: "))
+# Program untuk mengonversi suhu dari Celcius menjadi Fahrenheit
 
-# Menggunakan operator aritmatika untuk menghitung total sementara
-total_sementara = (harga_A * qty_A) + (harga_B * qty_B)
+# Inisialisasi nilai suhu dalam Celcius
+suhu_c = 35
 
-# Menghitung nilai pajak (PPN) sebesar 11%
-pajak = total_sementara * 0.11  # sama dengan 11%
+# Rumus konversi suhu: (C × 9/5) + 32
+suhu_f = (suhu_c * 9/5) + 32
 
-# Menggunakan operator penugasan untuk menambah pajak ke total bayar
-total_pembayaran = total_sementara
-total_pembayaran += pajak
+# Menampilkan hasil konversi ke layar
+print(f"Hasil konversi: {suhu_f} derajat Fahrenheit")
+# Program untuk memeriksa apakah sebuah angka termasuk ganjil atau genap
 
-# Menampilkan hasil perhitungan pembelian
-print("\n=== Rincian Pembayaran ===")
-print(f"Total Sebelum Pajak : Rp {total_sementara}")
-print(f"PPN (11%)           : Rp {pajak}")
-print(f"Jumlah yang Harus Dibayar : Rp {total_pembayaran}")
+# Deklarasi variabel angka
+nilai = 14
+
+# Kondisi untuk menentukan jenis bilangan
+if nilai % 2 == 0:
+    print(f"Angka {nilai} merupakan bilangan genap.")
+else:
+    print(f"Angka {nilai} merupakan bilangan ganjil.")
+
