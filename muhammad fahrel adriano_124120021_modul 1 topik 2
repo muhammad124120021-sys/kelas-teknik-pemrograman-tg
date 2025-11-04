@@ -1,21 +1,23 @@
-# Program untuk Menghitung Luas dan Keliling Persegi Panjang
-print("=== Program Hitung Luas & Keliling Persegi Panjang ===")
+# Program untuk menghitung luas dari sebuah lingkaran
 
-# Input nilai panjang dan lebar dari pengguna
-# Fungsi float() digunakan agar input bisa berupa angka desimal
-p = float(input("Inputkan nilai panjang (cm): "))
-l = float(input("Inputkan nilai lebar (cm): "))
+# Inisialisasi nilai jari-jari
+jari_jari = 9
 
-# Menghitung hasil luas dan keliling
-# Hasil disimpan dalam variabel luas_persegi dan keliling_persegi
-luas_persegi = p * l
-keliling_persegi = 2 * (p + l)
+# Nilai konstanta phi (π)
+phi = 3.14
 
-# Menampilkan hasil perhitungan
-print("\n=== Hasil Perhitungan ===")
-# f-string digunakan untuk menampilkan teks dan variabel dalam satu baris
-print(f"Panjang = {p} cm")
-print(f"Lebar   = {l} cm")
-print("--------------------------")
-print(f"Luas Persegi Panjang     = {luas_persegi} cm²")
-print(f"Keliling Persegi Panjang = {keliling_persegi} cm")
+# Proses perhitungan luas lingkaran: π × r²
+hasil_luas = phi * (jari_jari ** 2)
+
+# Tampilkan hasil ke layar
+print("Hasil perhitungan luas lingkaran =", hasil_luas)
+# Program untuk menampilkan informasi pribadi seseorang
+
+# Inisialisasi variabel data diri
+nama_lengkap = "Muhammad Fahrel Adriano"
+usia = 19
+tinggi = 1.80
+mahasiswa_aktif = True
+
+# Cetak semua informasi dalam satu kalimat
+print("Perkenalkan, saya", nama_lengkap, "berusia", usia, "tahun, memiliki tinggi", tinggi, "meter, dan status mahasiswa aktif =", mahasiswa_aktif, ".")
