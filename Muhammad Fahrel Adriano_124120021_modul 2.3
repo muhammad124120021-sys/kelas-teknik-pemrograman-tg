@@ -35,30 +35,73 @@ data_survei = {
 
 
 # ==========================================================
-# FUNGSI QC SEISMIK
+# 1. QC DATA SEISMIK
 # ==========================================================
 
 def qc_seismik(data, ambang_offset):
     laporan = {}
 
     for nama_survey, konten in data.items():
-        daftar_seismik = konten["seismik"]
+        seismik = konten["seismik"]
 
-        # Siapkan penghitung
+        # Inisialisasi
         laporan[nama_survey] = {"OK": 0, "BAD": 0}
 
-        for trace in daftar_seismik:
+        for trace in seismik:
 
-            # Tentukan QC_flag berdasarkan offset
+            # Tentukan OK/BAD berdasarkan offset
             if trace["offset"] > ambang_offset:
                 trace["QC_flag"] = "BAD"
             else:
                 trace["QC_flag"] = "OK"
 
-            # Hitung OK/BAD
             laporan[nama_survey][trace["QC_flag"]] += 1
 
     return laporan
+
+
+# ==========================================================
+# 2. STATISTIK GRAVITASI
+# ==========================================================
+
+def statistik_gravitasi(data):
+    hasil = {}
+    semua_nilai = []
+
+    for nama_survey, konten in data.items():
+        gravitasi = konten["gravitasi"]
+        nilai_grav = [g["nilai"] for g in gravitasi]
+
+        # Rata-rata tiap survey
+        rata = sum(nilai_grav) / len(nilai_grav)
+        hasil[nama_survey] = {"rata_rata": rata}
+
+        # Kumpulkan semua nilai gravitasi
+        semua_nilai.extend(nilai_grav)
+
+    # Statistik global
+    hasil["min_global"] = min(semua_nilai)
+    hasil["max_global"] = max(semua_nilai)
+
+    return hasil
+
+
+# ==========================================================
+# 3. ANALISIS MAGNETIK
+# ==========================================================
+
+def analisis_magnetik(data):
+    semua_mag = []
+
+    for nama_survey, konten in data.items():
+        magnetik = konten["magnetik"]
+        nilai_mag = [m["nilai"] for m in magnetik]
+        semua_mag.extend(nilai_mag)
+
+    # Nilai unik menggunakan set
+    nilai_unik = sorted(set(semua_mag))
+
+    return nilai_unik
 
 
 # ==========================================================
@@ -66,9 +109,18 @@ def qc_seismik(data, ambang_offset):
 # ==========================================================
 
 if __name__ == "__main__":
-    # Menjalankan QC dengan ambang offset tertentu
-    hasil_qc = qc_seismik(data_survei, ambang_offset=180)
 
-    print("=== LAPORAN QC SEISMIK ===")
-    for survey, info in hasil_qc.items():
-        print(f"{survey}: {info}")
+    # ----- QC Seismik -----
+    qc = qc_seismik(data_survei, ambang_offset=180)
+    print("=== QC SEISMIK ===")
+    print(qc)
+
+    # ----- Statistik Gravitasi -----
+    grav = statistik_gravitasi(data_survei)
+    print("\n=== STATISTIK GRAVITASI ===")
+    print(grav)
+
+    # ----- Analisis Magnetik -----
+    mag = analisis_magnetik(data_survei)
+    print("\n=== ANALISIS MAGNETIK ===")
+    print(mag)
