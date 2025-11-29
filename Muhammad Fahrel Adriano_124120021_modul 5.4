@@ -1,0 +1,26 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import griddata
+
+# Data
+data = pd.DataFrame({
+    'X': [0, 0, 50, 50, 100, 100],
+    'Y': [0, 50, 0, 50, 0, 50],
+    'Total_Field': [43210, 43280, 43100, 43420, 43050, 43500]
+})
+
+# Membuat grid
+grid_x, grid_y = np.meshgrid(np.linspace(data.X.min(), data.X.max(), 50),
+                             np.linspace(data.Y.min(), data.Y.max(), 50))
+
+# Interpolasi data ke grid
+grid_z = griddata((data.X, data.Y), data.Total_Field, (grid_x, grid_y), method='cubic')
+
+# Membuat contour plot
+plt.contourf(grid_x, grid_y, grid_z, cmap='jet', levels=15)
+plt.colorbar(label='Total Field (nT)')
+plt.xlabel('X (m)')
+plt.ylabel('Y (m)')
+plt.title('Peta Kontur Anomali Magnetik')
+plt.show()
