@@ -1,0 +1,236 @@
+# ============================================================
+# MODUL 3 - OOP GEOPHYSICS (FULL CODE)
+# ============================================================
+
+import random
+
+
+# ============================================================
+# 3.1 KONSEP DASAR KELAS & OBJEK
+# ============================================================
+
+class Mahasiswa:
+    def __init__(self, nama, nim, prodi):
+        self.nama = nama
+        self.nim = nim
+        self.prodi = prodi
+
+    def tampilkan_data(self):
+        print(f"Nama: {self.nama}, NIM: {self.nim}, Prodi: {self.prodi}")
+
+
+# Contoh objek Mahasiswa
+m1 = Mahasiswa("Andi", "12345", "Geofisika")
+m2 = Mahasiswa("Budi", "23456", "Geologi")
+m3 = Mahasiswa("Citra", "34567", "Teknik Geologi")
+
+m1.tampilkan_data()
+m2.tampilkan_data()
+m3.tampilkan_data()
+
+
+# ============================================================
+# 3.2 ENCAPSULATION
+# ============================================================
+
+class SensorEncap:
+    def __init__(self, nama, lokasi, nilai_sinyal):
+        self.nama = nama
+        self.lokasi = lokasi
+        self.__nilai_sinyal = nilai_sinyal  # PRIVATE
+
+    def get_sinyal(self):
+        return self.__nilai_sinyal
+
+    def set_sinyal(self, nilai_baru):
+        if nilai_baru >= 0:
+            self.__nilai_sinyal = nilai_baru
+        else:
+            print("Error: nilai sinyal tidak boleh negatif!")
+
+
+# Uji Encapsulation
+s1 = SensorEncap("Sensor_A", "Pos 1", 10)
+print("\nSinyal awal:", s1.get_sinyal())
+s1.set_sinyal(15)
+print("Sinyal setelah update:", s1.get_sinyal())
+s1.set_sinyal(-5)  # uji validasi
+
+
+# ============================================================
+# 3.3 INHERITANCE
+# ============================================================
+
+class AlatGeofisika:
+    def __init__(self, nama, tipe):
+        self.nama = nama
+        self.tipe = tipe
+
+    def info(self):
+        print(f"Nama alat: {self.nama}, Tipe: {self.tipe}")
+
+
+class Magnetometer(AlatGeofisika):
+    def __init__(self, nama, tipe, sensitivitas):
+        super().__init__(nama, tipe)
+        self.sensitivitas = sensitivitas
+
+    def info(self):
+        super().info()
+        print(f"Sensitivitas magnetik: {self.sensitivitas}")
+
+
+class Gravimeter(AlatGeofisika):
+    def __init__(self, nama, tipe, akurasi):
+        super().__init__(nama, tipe)
+        self.akurasi = akurasi
+
+    def info(self):
+        super().info()
+        print(f"Akurasi gravitasi: {self.akurasi}")
+
+
+# Contoh objek
+alat1 = Magnetometer("Magneto-X", "Magnetic", 0.01)
+alat2 = Gravimeter("Gravi-Pro", "Gravity", 0.001)
+
+alat1.info()
+alat2.info()
+
+
+# ============================================================
+# 3.4 POLYMORPHISM
+# ============================================================
+
+class Sensor:
+    def baca_data(self):
+        print("Membaca data sensor umum...")
+
+
+class SensorSeismikPoly(Sensor):
+    def baca_data(self):
+        print("Mengambil amplitudo seismik...")
+
+
+class SensorMagnetikPoly(Sensor):
+    def baca_data(self):
+        print("Mengambil intensitas medan magnet...")
+
+
+# Daftar sensor untuk uji polymorphism
+sensor_list_poly = [Sensor(), SensorSeismikPoly(), SensorMagnetikPoly()]
+
+print("\n=== Polymorphism Test ===")
+for s in sensor_list_poly:
+    s.baca_data()
+
+
+# ============================================================
+# 3.5 STUDI KASUS GEOFISIKA – MANAJEMEN DATA SENSOR
+# ============================================================
+
+class SensorSeismik(Sensor):
+    def __init__(self, nama, lokasi, frekuensi):
+        self.nama = nama
+        self.lokasi = lokasi
+        self.frekuensi = frekuensi
+        self.data = []
+
+    def tambah_data(self, nilai):
+        self.data.append(nilai)
+
+    def rata_amplitudo(self):
+        return sum(self.data) / len(self.data) if self.data else 0
+
+
+class SensorMagnetik(Sensor):
+    def __init__(self, nama, lokasi, skala):
+        self.nama = nama
+        self.lokasi = lokasi
+        self.skala = skala
+        self.data = []
+
+    def tambah_data(self, nilai):
+        self.data.append(nilai)
+
+    def rata_intensitas(self):
+        return sum(self.data) / len(self.data) if self.data else 0
+
+
+# Simulasi tambah data
+print("\n=== Studi Kasus Sensor ===")
+seis = SensorSeismik("Seismo_1", "Pos A", 50)
+mag = SensorMagnetik("Magnet_1", "Pos B", 100)
+
+for _ in range(10):
+    seis.tambah_data(random.uniform(0.1, 1.0))
+    mag.tambah_data(random.uniform(45, 55))
+
+print("Rata amplitudo seismik:", seis.rata_amplitudo())
+print("Rata intensitas magnetik:", mag.rata_intensitas())
+
+
+# ============================================================
+# TUGAS AKHIR PRAKTIKUM – PROGRAM LENGKAP
+# ============================================================
+
+class SensorBase:
+    def __init__(self, id, lokasi):
+        self.id = id
+        self.lokasi = lokasi
+        self.status = "OFF"
+        self.data = []
+
+    def aktifkan_sensor(self):
+        self.status = "ON"
+
+    def nonaktifkan_sensor(self):
+        self.status = "OFF"
+
+    def rekam_data(self):
+        raise NotImplementedError("Harus diimplementasikan di kelas turunan.")
+
+
+class SensorSeismikFinal(SensorBase):
+    def __init__(self, id, lokasi, frekuensi):
+        super().__init__(id, lokasi)
+        self.frekuensi = frekuensi
+
+    def rekam_data(self):
+        if self.status == "ON":
+            self.data.append(random.uniform(0.1, 1.0))
+
+
+class SensorGravitasiFinal(SensorBase):
+    def __init__(self, id, lokasi, akurasi):
+        super().__init__(id, lokasi)
+        self.akurasi = akurasi
+
+    def rekam_data(self):
+        if self.status == "ON":
+            self.data.append(random.uniform(9.6, 9.9))
+
+
+# Daftar sensor
+sensor_final = [
+    SensorSeismikFinal("S01", "Stasiun A", 50),
+    SensorSeismikFinal("S02", "Stasiun B", 60),
+    SensorGravitasiFinal("G01", "Stasiun C", 0.001),
+]
+
+# Aktifkan sensor
+for s in sensor_final:
+    s.aktifkan_sensor()
+
+# Rekam data 10 kali
+for _ in range(10):
+    for s in sensor_final:
+        s.rekam_data()
+
+# Laporan
+print("\n=== LAPORAN SENSOR (FINAL) ===")
+print("ID\tLokasi\t\tStatus\tJumlah Data\tRata-rata")
+
+for s in sensor_final:
+    avg = sum(s.data) / len(s.data) if s.data else 0
+    print(f"{s.id}\t{s.lokasi}\t{s.status}\t{len(s.data)}\t\t{avg:.3f}")
