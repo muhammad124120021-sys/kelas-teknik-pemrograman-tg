@@ -1,8 +1,8 @@
 # ============================================
 # Fungsi Sapaan
 # ============================================
-def salam(nama):
-    return f"Halo, selamat pagi {nama}!"
+def salam(fahrel):
+    return f"Halo, selamat pagi {fahrel}!"
 
 
 # ============================================
@@ -29,7 +29,7 @@ def pangkatkan(angka, eksponen):
 # ============================================
 # Program Utama
 # ============================================
-user = input("Silakan masukkan nama: ")
+user = input("Muhammad Fahrel Adriano: ")
 print(salam(user))
 
 while True:
