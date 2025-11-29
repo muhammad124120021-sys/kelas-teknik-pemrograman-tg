@@ -1,0 +1,74 @@
+# ==========================================================
+# DATA SURVEI
+# ==========================================================
+
+data_survei = {
+    "Survey_Alpha": {
+        "seismik": [
+            {"trace_id": 1, "offset": 120, "QC_flag": "OK"},
+            {"trace_id": 2, "offset": 300, "QC_flag": "BAD"}
+        ],
+        "gravitasi": [
+            {"point_id": "G1", "nilai": 9.81},
+            {"point_id": "G2", "nilai": 9.75}
+        ],
+        "magnetik": [
+            {"point_id": "M1", "nilai": 48.5},
+            {"point_id": "M2", "nilai": 49.0}
+        ]
+    },
+    "Survey_Beta": {
+        "seismik": [
+            {"trace_id": 3, "offset": 200, "QC_flag": "OK"},
+            {"trace_id": 4, "offset": 250, "QC_flag": "OK"}
+        ],
+        "gravitasi": [
+            {"point_id": "G3", "nilai": 9.70},
+            {"point_id": "G4", "nilai": 9.65}
+        ],
+        "magnetik": [
+            {"point_id": "M3", "nilai": 50.2},
+            {"point_id": "M4", "nilai": 49.8}
+        ]
+    }
+}
+
+
+# ==========================================================
+# FUNGSI QC SEISMIK
+# ==========================================================
+
+def qc_seismik(data, ambang_offset):
+    laporan = {}
+
+    for nama_survey, konten in data.items():
+        daftar_seismik = konten["seismik"]
+
+        # Siapkan penghitung
+        laporan[nama_survey] = {"OK": 0, "BAD": 0}
+
+        for trace in daftar_seismik:
+
+            # Tentukan QC_flag berdasarkan offset
+            if trace["offset"] > ambang_offset:
+                trace["QC_flag"] = "BAD"
+            else:
+                trace["QC_flag"] = "OK"
+
+            # Hitung OK/BAD
+            laporan[nama_survey][trace["QC_flag"]] += 1
+
+    return laporan
+
+
+# ==========================================================
+# PROGRAM UTAMA
+# ==========================================================
+
+if __name__ == "__main__":
+    # Menjalankan QC dengan ambang offset tertentu
+    hasil_qc = qc_seismik(data_survei, ambang_offset=180)
+
+    print("=== LAPORAN QC SEISMIK ===")
+    for survey, info in hasil_qc.items():
+        print(f"{survey}: {info}")
