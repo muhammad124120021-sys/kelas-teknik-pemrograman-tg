@@ -1,0 +1,63 @@
+# ============================================
+# DATA SENSOR
+# ============================================
+
+sensor_data = {
+    "Sensor_A": [(1, 0.12), (2, 0.15), (3, 0.30)],
+    "Sensor_B": [(1, 0.20), (2, 0.18), (3, 0.25)],
+    "Sensor_C": [(1, 0.11), (2, 0.10), (3, 0.40)]
+}
+
+
+# ============================================
+# FUNGSI 1: Amplitudo maksimum tiap sensor
+# ============================================
+
+def cari_amplitudo_maks(data):
+    hasil = {}
+    for sensor, catatan in data.items():
+        amplitudo_tertinggi = max(a for _, a in catatan)
+        hasil[sensor] = amplitudo_tertinggi
+    return hasil
+
+
+# ============================================
+# FUNGSI 2: Waktu terjadinya amplitudo maksimum
+# ============================================
+
+def cari_waktu_puncak(data):
+    hasil = {}
+    for sensor, catatan in data.items():
+        waktu, amp = max(catatan, key=lambda x: x[1])
+        hasil[sensor] = waktu
+    return hasil
+
+
+# ============================================
+# FUNGSI 3: Menggabungkan hasil menjadi laporan
+# ============================================
+
+def buat_laporan_sensor(data):
+    amplitudo_maks = cari_amplitudo_maks(data)
+    waktu_puncak = cari_waktu_puncak(data)
+
+    laporan = []
+    for sensor in data.keys():
+        laporan.append({
+            "sensor": sensor,
+            "amplitudo_maks": amplitudo_maks[sensor],
+            "waktu_puncak": waktu_puncak[sensor]
+        })
+    return laporan
+
+
+# ============================================
+# PROGRAM UTAMA
+# ============================================
+
+if __name__ == "__main__":
+    laporan = buat_laporan_sensor(sensor_data)
+
+    print("=== LAPORAN SENSOR ===")
+    for item in laporan:
+        print(item)
