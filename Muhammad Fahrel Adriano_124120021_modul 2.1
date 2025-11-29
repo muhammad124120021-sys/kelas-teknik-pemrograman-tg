@@ -1,0 +1,127 @@
+# =====================================================================
+#  BAGIAN 1 — Analisis Data Survey Seismik
+# =====================================================================
+
+survey = {
+    "Survey_A": [
+        {"trace_id": 1, "receiver": "R1", "offset": 100, "QC_flag": "OK"},
+        {"trace_id": 2, "receiver": "R2", "offset": 150, "QC_flag": "OK"},
+        {"trace_id": 3, "receiver": "R3", "offset": 200, "QC_flag": "BAD"}
+    ],
+    "Survey_B": [
+        {"trace_id": 4, "receiver": "R1", "offset": 120, "QC_flag": "OK"},
+        {"trace_id": 5, "receiver": "R4", "offset": 250, "QC_flag": "OK"},
+        {"trace_id": 6, "receiver": "R2", "offset": 300, "QC_flag": "BAD"}
+    ]
+}
+
+
+# --- 1.1 Ambil trace_id yang memiliki QC_flag BAD ---
+def cari_trace_bad(data):
+    return [t["trace_id"] 
+            for daftar in data.values() 
+            for t in daftar 
+            if t["QC_flag"] == "BAD"]
+
+
+# --- 1.2 Hitung total trace dari seluruh survey ---
+def total_trace(data):
+    return sum(len(traces) for traces in data.values())
+
+
+# --- 1.3 Temukan survey dengan jumlah trace terbanyak ---
+def survey_terbanyak(data):
+    return max(data, key=lambda s: len(data[s]))
+
+
+# --- 1.4 Buat set receiver unik ---
+def receiver_unik(data):
+    return {t["receiver"] 
+            for survey in data.values() 
+            for t in survey}
+
+
+# --- 1.5 Hitung frekuensi receiver (dictionary baru) ---
+def hitung_receiver(data):
+    frek = {}
+    for daftar in data.values():
+        for t in daftar:
+            r = t["receiver"]
+            frek[r] = frek.get(r, 0) + 1
+    return frek
+
+
+
+# =====================================================================
+#  BAGIAN 2 — Database Sensor Geofisika
+# =====================================================================
+
+sensor_data = {
+    "Sensor_A": [(1, 0.12), (2, 0.15), (3, 0.30)],
+    "Sensor_B": [(1, 0.20), (2, 0.18), (3, 0.25)],
+    "Sensor_C": [(1, 0.11), (2, 0.10), (3, 0.40)]
+}
+
+
+# --- 2.1 Amplitudo maksimum untuk tiap sensor ---
+def cari_amplitudo_maks(data):
+    hasil = {}
+    for sensor, catatan in data.items():
+        amplitudo_maks = max(a for _, a in catatan)
+        hasil[sensor] = amplitudo_maks
+    return hasil
+
+
+# --- 2.2 Waktu ketika amplitudo maksimum terjadi ---
+def waktu_amplitudo_maks(data):
+    hasil = {}
+    for sensor, catatan in data.items():
+        waktu, amp = max(catatan, key=lambda x: x[1])
+        hasil[sensor] = waktu
+    return hasil
+
+
+# --- 2.3 Gabungkan hasil dalam list of dictionary ---
+def buat_laporan_sensor(data):
+    maks_amp = cari_amplitudo_maks(data)
+    waktu_puncak = waktu_amplitudo_maks(data)
+
+    laporan = []
+    for sensor in data.keys():
+        laporan.append({
+            "sensor": sensor,
+            "amplitudo_maks": maks_amp[sensor],
+            "waktu_puncak": waktu_puncak[sensor]
+        })
+    return laporan
+
+
+
+# =====================================================================
+#  PROGRAM UTAMA
+# =====================================================================
+if __name__ == "__main__":
+
+    print("\n===================== ANALISIS SURVEY =====================")
+
+    bad = cari_trace_bad(survey)
+    print("Trace BAD:", bad)
+
+    total = total_trace(survey)
+    print("Total trace:", total)
+
+    terbanyak = survey_terbanyak(survey)
+    print("Survey terbanyak:", terbanyak)
+
+    receiver = receiver_unik(survey)
+    print("Receiver unik:", receiver)
+
+    freq_receiver = hitung_receiver(survey)
+    print("Frekuensi receiver:", freq_receiver)
+
+
+    print("\n===================== ANALISIS SENSOR =====================")
+
+    laporan_sensor = buat_laporan_sensor(sensor_data)
+    for item in laporan_sensor:
+        print(item)
