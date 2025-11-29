@@ -1,0 +1,314 @@
+# analisis_seismik.py
+"""
+TUGAS PRAKTIKUM MODUL 4 - ANALISIS DATA MIKROSEISMIK
+Nama: [Muhammad Fahrel Adriano]
+NIM: [124120021]
+"""
+
+import pandas as pd
+import numpy as np
+import os
+from datetime import datetime
+
+print("=" * 70)
+print("ANALISIS DATA MIKROSEISMIK - MONITORING AKTIVITAS SEISMIK")
+print("=" * 70)
+
+def buat_data_contoh():
+    """
+    Fungsi untuk membuat data contoh jika file tidak ada
+    Data ini mensimulasikan data mikroseismik di sekitar area pengeboran
+    """
+    print("Membuat data contoh 'data_mikroseismik.csv'...")
+    
+    np.random.seed(42)  # Untuk hasil yang konsisten
+    
+    # Generate data yang realistis
+    n_events = 45
+    data = {
+        'Waktu_UTC': pd.date_range('2024-03-01', periods=n_events, freq='3H'),
+        'X_m': np.random.normal(0, 750, n_events),
+        'Y_m': np.random.normal(0, 650, n_events),
+        'Z_m': np.random.normal(-1800, 400, n_events),
+        'Magnitudo': np.random.uniform(0.8, 3.2, n_events)
+    }
+    
+    # Tambahkan beberapa data tidak wajar untuk demonstrasi cleaning
+    data['Magnitudo'][3] = -0.8      # Magnitudo negatif
+    data['Magnitudo'][12] = 6.5      # Magnitudo terlalu besar
+    data['Magnitudo'][25] = 0.1      # Magnitudo sangat kecil tapi masih valid
+    data['Z_m'][8] = 150             # Kedalaman positif (tidak mungkin)
+    data['X_m'][18] = np.nan         # Missing value
+    data['Y_m'][30] = np.nan         # Missing value
+    
+    df = pd.DataFrame(data)
+    df.to_csv('data_mikroseismik.csv', index=False)
+    print("✓ File 'data_mikroseismik.csv' berhasil dibuat")
+    return df
+
+def analisis_seismik():
+    """
+    Fungsi utama untuk analisis data mikroseismik
+    """
+    
+    # 1. MEMBACA & INSPEKSI DATA
+    print("\n" + "="*50)
+    print("1. MEMBACA & INSPEKSI DATA")
+    print("="*50)
+    
+    # Cek apakah file exists, jika tidak buat data contoh
+    if not os.path.exists('data_mikroseismik.csv'):
+        print("File 'data_mikroseismik.csv' tidak ditemukan!")
+        buat_data_contoh()
+    
+    try:
+        # Membaca data dari CSV
+        df = pd.read_csv('data_mikroseismik.csv')
+        print("✓ Data berhasil dimuat dari 'data_mikroseismik.csv'")
+        
+        # Informasi dasar dataset
+        print(f"\nDimensi dataset: {df.shape[0]} baris × {df.shape[1]} kolom")
+        print(f"Kolom yang tersedia: {list(df.columns)}")
+        
+        # Tampilkan 5 data pertama
+        print("\n5 DATA PERTAMA:")
+        print(df.head())
+        
+        # Inspeksi menggunakan .info()
+        print("\nINFORMASI STRUKTUR DATA (.info()):")
+        df.info()
+        
+        # Statistik deskriptif menggunakan .describe()
+        print("\nSTATISTIK DESKRIPTIF (.describe()):")
+        print(df.describe())
+        
+    except Exception as e:
+        print(f"❌ ERROR: Gagal memuat data - {e}")
+        return
+    
+    # 2. PEMBERSIHAN DATA (DATA CLEANING)
+    print("\n" + "="*50)
+    print("2. PEMBERSIHAN DATA")
+    print("="*50)
+    
+    # Simpan jumlah data awal
+    data_awal = len(df)
+    print(f"Jumlah data awal: {data_awal} kejadian")
+    
+    # 2.1. Cek dan handle missing values (NaN)
+    missing_data = df.isnull().sum()
+    print(f"\nNILAI HILANG (NaN) PER KOLOM:")
+    total_missing = 0
+    for col, count in missing_data.items():
+        if count > 0:
+            print(f"  - {col}: {count} nilai hilang")
+            total_missing += count
+    
+    if total_missing > 0:
+        df_clean = df.dropna()
+        print(f"✓ Dihapus {len(df) - len(df_clean)} baris dengan nilai hilang")
+    else:
+        df_clean = df.copy()
+        print("✓ Tidak ada nilai hilang (NaN) yang ditemukan")
+    
+    # 2.2. Filter data dengan magnitudo wajar (magnitudo > 0)
+    kondisi_magnitudo_wajar = df_clean['Magnitudo'] > 0
+    data_sebelum_filter = len(df_clean)
+    df_clean = df_clean[kondisi_magnitudo_wajar]
+    data_magnitudo_tidak_wajar = data_sebelum_filter - len(df_clean)
+    
+    print(f"✓ Dihapus {data_magnitudo_tidak_wajar} baris dengan magnitudo ≤ 0")
+    
+    # 2.3. Filter data dengan kedalaman wajar (Z_m < 0, karena kedalaman harus negatif)
+    kondisi_kedalaman_wajar = df_clean['Z_m'] < 0
+    data_sebelum_filter = len(df_clean)
+    df_clean = df_clean[kondisi_kedalaman_wajar]
+    data_kedalaman_tidak_wajar = data_sebelum_filter - len(df_clean)
+    
+    print(f"✓ Dihapus {data_kedalaman_tidak_wajar} baris dengan kedalaman ≥ 0")
+    
+    # Ringkasan pembersihan data
+    print(f"\nRINGKASAN PEMBERSIHAN DATA:")
+    print(f"  Data awal: {data_awal} kejadian")
+    print(f"  Data setelah cleaning: {len(df_clean)} kejadian")
+    print(f"  Data tidak valid: {data_awal - len(df_clean)} kejadian")
+    print(f"  Persentase data valid: {(len(df_clean)/data_awal*100):.1f}%")
+    
+    if len(df_clean) == 0:
+        print("❌ ERROR: Tidak ada data valid setelah cleaning!")
+        return
+    
+    # 3. KONVERSI TIPE DATA
+    print("\n" + "="*50)
+    print("3. KONVERSI TIPE DATA")
+    print("="*50)
+    
+    # Konversi kolom Waktu_UTC dari string ke datetime
+    try:
+        df_clean['Waktu_UTC'] = pd.to_datetime(df_clean['Waktu_UTC'])
+        print("✓ Kolom 'Waktu_UTC' berhasil dikonversi ke datetime")
+        
+        # Tampilkan informasi tentang periode waktu
+        print(f"  Periode data: {df_clean['Waktu_UTC'].min().strftime('%Y-%m-%d %H:%M')} hingga {df_clean['Waktu_UTC'].max().strftime('%Y-%m-%d %H:%M')}")
+        print(f"  Rentang waktu: {(df_clean['Waktu_UTC'].max() - df_clean['Waktu_UTC'].min()).days} hari")
+        
+    except Exception as e:
+        print(f"❌ ERROR: Gagal mengkonversi kolom Waktu_UTC - {e}")
+        return
+    
+    # 4. ANALISIS JARAK (FEATURE ENGINEERING)
+    print("\n" + "="*50)
+    print("4. ANALISIS JARAK")
+    print("="*50)
+    
+    # Asumsi: titik pusat monitoring berada di (X=0, Y=0)
+    # Hitung jarak horizontal menggunakan rumus Euclidean
+    df_clean['Jarak_Horizontal_m'] = np.sqrt(
+        df_clean['X_m']**2 + df_clean['Y_m']**2
+    )
+    
+    print("✓ Kolom 'Jarak_Horizontal_m' berhasil dibuat")
+    print(f"  Rumus: sqrt(X_m² + Y_m²)")
+    print(f"  Jarak horizontal - Rata-rata: {df_clean['Jarak_Horizontal_m'].mean():.1f} m")
+    print(f"  Jarak horizontal - Minimum: {df_clean['Jarak_Horizontal_m'].min():.1f} m")
+    print(f"  Jarak horizontal - Maksimum: {df_clean['Jarak_Horizontal_m'].max():.1f} m")
+    
+    # 5. ANALISIS STATISTIK & KRITERIA
+    print("\n" + "="*50)
+    print("5. ANALISIS STATISTIK & KRITERIA")
+    print("="*50)
+    
+    # 5.1. Identifikasi gempa dengan magnitudo terbesar dan terkecil
+    idx_magnitudo_terbesar = df_clean['Magnitudo'].idxmax()
+    idx_magnitudo_terkecil = df_clean['Magnitudo'].idxmin()
+    
+    gempa_terbesar = df_clean.loc[idx_magnitudo_terbesar]
+    gempa_terkecil = df_clean.loc[idx_magnitudo_terkecil]
+    
+    print("GEMPA DENGAN MAGNITUDO TERTINGGI:")
+    print(f"  • Waktu: {gempa_terbesar['Waktu_UTC'].strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"  • Koordinat (X, Y, Z): ({gempa_terbesar['X_m']:.1f}, {gempa_terbesar['Y_m']:.1f}, {gempa_terbesar['Z_m']:.1f}) m")
+    print(f"  • Magnitudo: {gempa_terbesar['Magnitudo']:.2f}")
+    print(f"  • Jarak dari pusat: {gempa_terbesar['Jarak_Horizontal_m']:.1f} m")
+    
+    print("\nGEMPA DENGAN MAGNITUDO TERENDAH:")
+    print(f"  • Waktu: {gempa_terkecil['Waktu_UTC'].strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"  • Koordinat (X, Y, Z): ({gempa_terkecil['X_m']:.1f}, {gempa_terkecil['Y_m']:.1f}, {gempa_terkecil['Z_m']:.1f}) m")
+    print(f"  • Magnitudo: {gempa_terkecil['Magnitudo']:.2f}")
+    print(f"  • Jarak dari pusat: {gempa_terkecil['Jarak_Horizontal_m']:.1f} m")
+    
+    # 5.2. Hitung kedalaman rata-rata
+    kedalaman_rata_rata = df_clean['Z_m'].mean()
+    print(f"\nKEDALAMAN RATA-RATA:")
+    print(f"  • Kedalaman rata-rata: {kedalaman_rata_rata:.1f} m")
+    print(f"  • Kedalaman minimum: {df_clean['Z_m'].min():.1f} m")
+    print(f"  • Kedalaman maksimum: {df_clean['Z_m'].max():.1f} m")
+    
+    # 5.3. Analisis distribusi kedalaman
+    batas_kedalaman = -1600  # meter
+    gempa_dangkal = len(df_clean[df_clean['Z_m'] > batas_kedalaman])
+    gempa_dalam = len(df_clean[df_clean['Z_m'] <= batas_kedalaman])
+    
+    print(f"\nDISTRIBUSI KEDALAMAN (batas: {batas_kedalaman} m):")
+    print(f"  • Gempa dangkal (Z > {batas_kedalaman} m): {gempa_dangkal} kejadian ({gempa_dangkal/len(df_clean)*100:.1f}%)")
+    print(f"  • Gempa dalam (Z ≤ {batas_kedalaman} m): {gempa_dalam} kejadian ({gempa_dalam/len(df_clean)*100:.1f}%)")
+    
+    # 5.4. Kejadian dalam radius 500 meter
+    radius_target = 500  # meter
+    kejadian_dalam_radius = len(df_clean[df_clean['Jarak_Horizontal_m'] < radius_target])
+    
+    print(f"\nKEJADIAN DALAM RADIUS {radius_target} METER:")
+    print(f"  • Jumlah kejadian: {kejadian_dalam_radius} kejadian")
+    print(f"  • Persentase dari total: {kejadian_dalam_radius/len(df_clean)*100:.1f}%")
+    
+    if kejadian_dalam_radius > 0:
+        print(f"  • Magnitudo rata-rata dalam radius: {df_clean[df_clean['Jarak_Horizontal_m'] < radius_target]['Magnitudo'].mean():.2f}")
+        print(f"  • Kedalaman rata-rata dalam radius: {df_clean[df_clean['Jarak_Horizontal_m'] < radius_target]['Z_m'].mean():.1f} m")
+    
+    # 6. MENULIS LAPORAN
+    print("\n" + "="*50)
+    print("6. MENULIS LAPORAN ANALISIS")
+    print("="*50)
+    
+    # Buat laporan dengan format yang rapi
+    laporan = f"""LAPORAN ANALISIS DATA MIKROSEISMIK
+========================================
+
+INFORMASI UMUM
+--------------
+Periode Analisis    : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Total Kejadian Valid: {len(df_clean)} dari {data_awal} data awal
+Periode Monitoring  : {df_clean['Waktu_UTC'].min().strftime('%Y-%m-%d')} hingga {df_clean['Waktu_UTC'].max().strftime('%Y-%m-%d')}
+Rentang Waktu       : {(df_clean['Waktu_UTC'].max() - df_clean['Waktu_UTC'].min()).days} hari
+
+STATISTIK UTAMA
+---------------
+Magnitudo           : {df_clean['Magnitudo'].min():.2f} - {df_clean['Magnitudo'].max():.2f} (avg: {df_clean['Magnitudo'].mean():.2f})
+Kedalaman (Z)       : {df_clean['Z_m'].min():.0f} - {df_clean['Z_m'].max():.0f} m (avg: {kedalaman_rata_rata:.0f} m)
+Jarak Horizontal    : {df_clean['Jarak_Horizontal_m'].min():.0f} - {df_clean['Jarak_Horizontal_m'].max():.0f} m
+
+KEJADIAN PENTING
+----------------
+GEMPA TERBESAR (Magnitudo Tertinggi):
+• Waktu     : {gempa_terbesar['Waktu_UTC'].strftime('%Y-%m-%d %H:%M:%S')}
+• Lokasi    : X={gempa_terbesar['X_m']:.1f} m, Y={gempa_terbesar['Y_m']:.1f} m, Z={gempa_terbesar['Z_m']:.1f} m
+• Magnitudo : {gempa_terbesar['Magnitudo']:.2f}
+• Jarak     : {gempa_terbesar['Jarak_Horizontal_m']:.1f} m dari pusat monitoring
+
+GEMPA TERKECIL (Magnitudo Terendah):
+• Waktu     : {gempa_terkecil['Waktu_UTC'].strftime('%Y-%m-%d %H:%M:%S')}
+• Lokasi    : X={gempa_terkecil['X_m']:.1f} m, Y={gempa_terkecil['Y_m']:.1f} m, Z={gempa_terkecil['Z_m']:.1f} m
+• Magnitudo : {gempa_terkecil['Magnitudo']:.2f}
+• Jarak     : {gempa_terkecil['Jarak_Horizontal_m']:.1f} m dari pusat monitoring
+
+ANALISIS KEDALAMAN
+------------------
+Kedalaman Rata-rata : {kedalaman_rata_rata:.1f} m
+Gempa Dangkal (Z > -1600 m) : {gempa_dangkal} kejadian ({gempa_dangkal/len(df_clean)*100:.1f}%)
+Gempa Dalam (Z ≤ -1600 m)   : {gempa_dalam} kejadian ({gempa_dalam/len(df_clean)*100:.1f}%)
+
+ANALISIS JARAK
+--------------
+Kejadian dalam Radius 500 m : {kejadian_dalam_radius} kejadian ({kejadian_dalam_radius/len(df_clean)*100:.1f}%)
+
+REKOMENDASI
+-----------
+1. Perhatikan gempa dengan magnitudo tinggi di sekitar area monitoring
+2. Monitor aktivitas dalam radius 500 meter dari pusat
+3. Analisis lebih lanjut untuk gempa pada kedalaman dangkal
+4. Pertimbangkan penambahan sensor jika aktivitas meningkat
+
+---
+Laporan dihasilkan secara otomatis oleh Sistem Monitoring Seismik
+"""
+
+    # Simpan laporan ke file
+    try:
+        with open('laporan_analisis.txt', 'w', encoding='utf-8') as file:
+            file.write(laporan)
+        print("✓ Laporan berhasil disimpan sebagai 'laporan_analisis.txt'")
+    except Exception as e:
+        print(f"❌ ERROR: Gagal menyimpan laporan - {e}")
+    
+    # Simpan data yang sudah dibersihkan
+    try:
+        df_clean.to_csv('data_seismik_terkoreksi.csv', index=False)
+        print("✓ Data terkoreksi disimpan sebagai 'data_seismik_terkoreksi.csv'")
+    except Exception as e:
+        print(f"❌ ERROR: Gagal menyimpan data terkoreksi - {e}")
+    
+    # Tampilkan ringkasan akhir
+    print("\n" + "="*70)
+    print("RINGKASAN AKHIR ANALISIS")
+    print("="*70)
+    print(f"✅ Data berhasil dianalisis: {len(df_clean)} kejadian valid")
+    print(f"✅ Magnitudo tertinggi: {gempa_terbesar['Magnitudo']:.2f}")
+    print(f"✅ Kedalaman rata-rata: {kedalaman_rata_rata:.1f} m")
+    print(f"✅ Kejadian dalam radius 500m: {kejadian_dalam_radius}")
+    print(f"✅ Laporan tersimpan: 'laporan_analisis.txt'")
+    print(f"✅ Data terkoreksi tersimpan: 'data_seismik_terkoreksi.csv'")
+    print("="*70)
+
+# Jalankan analisis
+if __name__ == "__main__":
+    analisis_seismik()
